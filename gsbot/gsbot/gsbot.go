@@ -18,19 +18,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Philipp15b/go-steam/v3"
-	"github.com/Philipp15b/go-steam/v3/gsbot"
-	"github.com/Philipp15b/go-steam/v3/protocol/steamlang"
+	"github.com/Flo4604/go-steam/go-steam/v3"
+	"github.com/Flo4604/go-steam/go-steam/v3/gsbot"
+	"github.com/Flo4604/go-steam/go-steam/v3/protocol/steamlang"
 )
 
-const usage string = "usage: gsbot [username] [-p password] [-a authcode] [-t twofactorcode] [-l loginkey]"
+const usage string = "usage: gsbot [username] [-p password] [-a authcode] [-t twofactorcode] [-l loginkey] [-anon]"
 
 func main() {
-	if len(os.Args) < 3 || len(os.Args)%2 != 0 {
-		fmt.Println(usage)
-		return
-	}
-
 	details := &steam.LogOnDetails{
 		Username:               os.Args[1],
 		ShouldRememberPassword: true,
@@ -38,6 +33,8 @@ func main() {
 
 	for i := 2; i < len(os.Args)-1; i += 2 {
 		switch os.Args[i] {
+		case "-anon":
+			details.Anonymous = true
 		case "-p":
 			details.Password = os.Args[i+1]
 		case "-a":
@@ -59,6 +56,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	client.RegisterPacketHandler(debug)
 	serverList := gsbot.NewServerList(bot, "serverlist.json")
 	serverList.Connect()

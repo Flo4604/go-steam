@@ -4,15 +4,16 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/Philipp15b/go-steam/v3/protocol/steamlang"
-	"github.com/Philipp15b/go-steam/v3/steamid"
+	"github.com/Flo4604/go-steam/go-steam/v3/protocol/steamlang"
+	"github.com/Flo4604/go-steam/go-steam/v3/steamid"
 )
 
 // Groups list is a thread safe map
 // They can be iterated over like so:
-// 	for id, group := range client.Social.Groups.GetCopy() {
-// 		log.Println(id, group.Name)
-// 	}
+//
+//	for id, group := range client.Social.Groups.GetCopy() {
+//		log.Println(id, group.Name)
+//	}
 type GroupsList struct {
 	mutex sync.RWMutex
 	byId  map[steamid.SteamId]*Group

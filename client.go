@@ -13,12 +13,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/Philipp15b/go-steam/v3/cryptoutil"
-	"github.com/Philipp15b/go-steam/v3/netutil"
-	"github.com/Philipp15b/go-steam/v3/protocol"
-	"github.com/Philipp15b/go-steam/v3/protocol/protobuf"
-	"github.com/Philipp15b/go-steam/v3/protocol/steamlang"
-	"github.com/Philipp15b/go-steam/v3/steamid"
+	"github.com/Flo4604/go-steam/go-steam/v3/cryptoutil"
+	"github.com/Flo4604/go-steam/go-steam/v3/netutil"
+	"github.com/Flo4604/go-steam/go-steam/v3/protocol"
+	"github.com/Flo4604/go-steam/go-steam/v3/protocol/protobuf"
+	"github.com/Flo4604/go-steam/go-steam/v3/protocol/steamlang"
+	"github.com/Flo4604/go-steam/go-steam/v3/steamid"
 )
 
 // Represents a client to the Steam network.
@@ -35,6 +35,7 @@ type Client struct {
 	currentJobId uint64
 
 	Auth          *Auth
+	App           *App
 	Social        *Social
 	Web           *Web
 	Notifications *Notifications
@@ -68,6 +69,9 @@ func NewClient() *Client {
 
 	client.Auth = &Auth{client: client}
 	client.RegisterPacketHandler(client.Auth)
+
+	client.App = &App{client: client}
+	client.RegisterPacketHandler(client.App)
 
 	client.Social = newSocial(client)
 	client.RegisterPacketHandler(client.Social)

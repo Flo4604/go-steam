@@ -22,9 +22,9 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/Philipp15b/go-steam/v3"
-	"github.com/Philipp15b/go-steam/v3/netutil"
-	"github.com/Philipp15b/go-steam/v3/protocol"
+	"github.com/Flo4604/go-steam/go-steam/v3"
+	"github.com/Flo4604/go-steam/go-steam/v3/netutil"
+	"github.com/Flo4604/go-steam/go-steam/v3/protocol"
 	"github.com/davecgh/go-spew/spew"
 )
 
@@ -80,7 +80,7 @@ func (a *Auth) HandleEvent(event interface{}) {
 		a.bot.Log.Printf("Logged on (%v) with SteamId %v and account flags %v", e.Result, e.ClientSteamId, e.AccountFlags)
 	case *steam.MachineAuthUpdateEvent:
 		a.machineAuthHash = e.Hash
-		err := ioutil.WriteFile(a.sentryPath, e.Hash, 0666)
+		err := os.WriteFile(a.sentryPath, e.Hash, 0666)
 		if err != nil {
 			panic(err)
 		}

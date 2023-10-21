@@ -5,10 +5,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/Philipp15b/go-steam/v3/protocol"
-	"github.com/Philipp15b/go-steam/v3/protocol/protobuf"
-	"github.com/Philipp15b/go-steam/v3/protocol/steamlang"
-	"github.com/Philipp15b/go-steam/v3/steamid"
+	"github.com/Flo4604/go-steam/go-steam/v3/protocol"
+	"github.com/Flo4604/go-steam/go-steam/v3/protocol/protobuf"
+	"github.com/Flo4604/go-steam/go-steam/v3/protocol/steamlang"
+	"github.com/Flo4604/go-steam/go-steam/v3/steamid"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -20,6 +20,9 @@ type Auth struct {
 type SentryHash []byte
 
 type LogOnDetails struct {
+	// Indicate that we do not want to login
+	Anonymous bool
+
 	Username string
 
 	// If logging into an account without a login key, the account's password.
@@ -40,7 +43,9 @@ type LogOnDetails struct {
 
 // Log on with the given details. You must always specify username and
 // password OR username and loginkey. For the first login, don't set an authcode or a hash and you'll
-//  receive an error (EResult_AccountLogonDenied)
+//
+//	receive an error (EResult_AccountLogonDenied)
+//
 // and Steam will send you an authcode. Then you have to login again, this time with the authcode.
 // Shortly after logging in, you'll receive a MachineAuthUpdateEvent with a hash which allows
 // you to login without using an authcode in the future.
@@ -50,35 +55,45 @@ type LogOnDetails struct {
 // After the event EMsg_ClientNewLoginKey is received you can use the LoginKey
 // to login instead of using the password.
 func (a *Auth) LogOn(details *LogOnDetails) {
-	if details.Username == "" {
+	if !details.Anonymous && details.Username == "" {
 		panic("Username must be set!")
 	}
-	if details.Password == "" && details.LoginKey == "" {
+
+	if !details.Anonymous && details.Password == "" && details.LoginKey == "" {
 		panic("Password or LoginKey must be set!")
 	}
 
 	logon := new(protobuf.CMsgClientLogon)
-	logon.AccountName = &details.Username
-	logon.Password = &details.Password
-	if details.AuthCode != "" {
-		logon.AuthCode = proto.String(details.AuthCode)
+
+	if details.Anonymous {
+		logon.AnonUserTargetAccountName = proto.String(details.Username)
+		atomic.StoreUint64(&a.client.steamId, uint64(steamid.NewIdAdv(0, 1, int32(steamlang.EUniverse_Public), int32(steamlang.EAccountType_AnonUser))))
+	} else {
+
+		logon.AccountName = &details.Username
+		logon.Password = &details.Password
+		if details.AuthCode != "" {
+			logon.AuthCode = proto.String(details.AuthCode)
+		}
+		if details.TwoFactorCode != "" {
+			logon.TwoFactorCode = proto.String(details.TwoFactorCode)
+		}
+		logon.ClientLanguage = proto.String("english")
+		logon.ShaSentryfile = details.SentryFileHash
+		if details.LoginKey != "" {
+			logon.LoginKey = proto.String(details.LoginKey)
+		}
+		if details.ShouldRememberPassword {
+			logon.ShouldRememberPassword = proto.Bool(details.ShouldRememberPassword)
+		}
+
+		atomic.StoreUint64(&a.client.steamId, uint64(steamid.NewIdAdv(0, 1, int32(steamlang.EUniverse_Public), int32(steamlang.EAccountType_Individual))))
+
 	}
-	if details.TwoFactorCode != "" {
-		logon.TwoFactorCode = proto.String(details.TwoFactorCode)
-	}
-	logon.ClientLanguage = proto.String("english")
+
 	logon.ProtocolVersion = proto.Uint32(steamlang.MsgClientLogon_CurrentProtocol)
-	logon.ShaSentryfile = details.SentryFileHash
-	if details.LoginKey != "" {
-		logon.LoginKey = proto.String(details.LoginKey)
-	}
-	if details.ShouldRememberPassword {
-		logon.ShouldRememberPassword = proto.Bool(details.ShouldRememberPassword)
-	}
-
-	atomic.StoreUint64(&a.client.steamId, uint64(steamid.NewIdAdv(0, 1, int32(steamlang.EUniverse_Public), int32(steamlang.EAccountType_Individual))))
-
 	a.client.Write(protocol.NewClientMsgProtobuf(steamlang.EMsg_ClientLogon, logon))
+
 }
 
 func (a *Auth) HandlePacket(packet *protocol.Packet) {
