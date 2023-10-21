@@ -13,8 +13,7 @@ import (
 )
 
 type Auth struct {
-	client  *Client
-	details *LogOnDetails
+	client *Client
 }
 
 type SentryHash []byte
@@ -94,7 +93,6 @@ func (a *Auth) LogOn(details *LogOnDetails) {
 
 		atomic.StoreUint64(&a.client.steamId, uint64(steamid.NewIdAdv(0, 1, int32(steamlang.EUniverse_Public), int32(steamlang.EAccountType_Individual))))
 	} else {
-
 		// FIXME: Add Instance type 1 as used above = Desktop 0 = All which is needed for anon
 		atomic.StoreUint64(&a.client.steamId, uint64(steamid.NewIdAdv(0, 0, int32(steamlang.EUniverse_Public), int32(steamlang.EAccountType_AnonUser))))
 	}

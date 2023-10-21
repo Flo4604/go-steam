@@ -35,6 +35,7 @@ type Client struct {
 	currentJobId uint64
 
 	Auth          *Auth
+	Debug         *Debug
 	App           *App
 	Social        *Social
 	Web           *Web
@@ -57,21 +58,32 @@ type Client struct {
 	heartbeat *time.Ticker
 }
 
+type ClientOptions struct {
+	Debug *DebugOptions
+	App   *AppOptions
+}
+
 type PacketHandler interface {
 	HandlePacket(*protocol.Packet)
 }
 
-func NewClient() *Client {
+func NewClient(
+	options *ClientOptions,
+) *Client {
 	client := &Client{
 		events:   make(chan interface{}, 3),
 		writeBuf: new(bytes.Buffer),
 	}
 
+	client.Debug = &Debug{client: client, options: options.Debug}
+	client.Debug.init()
+	client.RegisterPacketHandler(client.Debug)
+
+	client.App = &App{client: client, options: options.App}
+	client.RegisterPacketHandler(client.App)
+
 	client.Auth = &Auth{client: client}
 	client.RegisterPacketHandler(client.Auth)
-
-	client.App = &App{client: client}
-	client.RegisterPacketHandler(client.App)
 
 	client.Social = newSocial(client)
 	client.RegisterPacketHandler(client.Social)

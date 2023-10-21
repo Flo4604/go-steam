@@ -16,11 +16,11 @@ type App struct {
 }
 
 type AppOptions struct {
-	enablePicsCache bool
+	EnablePicsCache bool
 
-	changelistUpdateInterval int // in seconds
+	ChangelistUpdateInterval int // in seconds
 
-	picsCacheAll bool
+	PicsCacheAll bool
 }
 
 func (a *App) HandlePacket(packet *protocol.Packet) {
@@ -46,11 +46,11 @@ func (a *App) GetProductInfo() {
 }
 
 func (a *App) getChangeListUpdate() {
-	if !a.options.enablePicsCache || a.options.changelistUpdateInterval <= 0 {
+	if !a.options.EnablePicsCache || a.options.ChangelistUpdateInterval <= 0 {
 		return
 	}
 
-	ticker := time.NewTicker(time.Duration(a.options.changelistUpdateInterval) * time.Second)
+	ticker := time.NewTicker(time.Duration(a.options.ChangelistUpdateInterval) * time.Second)
 	quit := make(chan struct{})
 	go func() {
 		for {
