@@ -31,7 +31,7 @@ func (sd *steamDirectory) Initialize() error {
 	sd.Lock()
 	defer sd.Unlock()
 	client := new(http.Client)
-	resp, err := client.Get(fmt.Sprintf("https://api.steampowered.com/ISteamDirectory/GetCMList/v1/?cellId=0"))
+	resp, err := client.Get("https://api.steampowered.com/ISteamDirectory/GetCMList/v1/?cellId=0")
 	if err != nil {
 		return err
 	}
@@ -43,15 +43,19 @@ func (sd *steamDirectory) Initialize() error {
 			Message    string
 		}
 	}{}
+
 	if err = json.NewDecoder(resp.Body).Decode(&r); err != nil {
 		return err
 	}
+
 	if r.Response.Result != 1 {
-		return fmt.Errorf("Failed to get steam directory, result: %v, message: %v\n", r.Response.Result, r.Response.Message)
+		return fmt.Errorf("failed to get steam directory, result: %v, message: %v\n", r.Response.Result, r.Response.Message)
 	}
+
 	if len(r.Response.ServerList) == 0 {
-		return fmt.Errorf("Steam returned zero servers for steam directory request\n")
+		return fmt.Errorf("steam returned zero servers for steam directory request\n")
 	}
+
 	sd.servers = r.Response.ServerList
 	sd.isInitialized = true
 	return nil

@@ -64,34 +64,41 @@ func (a *Auth) LogOn(details *LogOnDetails) {
 	}
 
 	logon := new(protobuf.CMsgClientLogon)
+	logon.ProtocolVersion = proto.Uint32(steamlang.MsgClientLogon_CurrentProtocol)
+	logon.MachineName = proto.String("") //FIXME: Allow passing in of machine name
+	logon.ShouldRememberPassword = proto.Bool(details.ShouldRememberPassword)
+	logon.SupportsRateLimitResponse = proto.Bool(false) // FIXME: This is true when not anon login
+	logon.ClientLanguage = proto.String("")
+	logon.AnonUserTargetAccountName = proto.String(details.Username)
+	logon.ClientOsType = proto.Uint32(203) // FIXME: Add actual OS // Allow passing in OS
+	logon.CellId = proto.Uint32(0)         // FIXME: Add actual CellID
 
-	if details.Anonymous {
-		logon.AnonUserTargetAccountName = proto.String(details.Username)
-		atomic.StoreUint64(&a.client.steamId, uint64(steamid.NewIdAdv(0, 1, int32(steamlang.EUniverse_Public), int32(steamlang.EAccountType_AnonUser))))
-	} else {
+	if !details.Anonymous {
+		logon.ClientLanguage = proto.String("english")
 
 		logon.AccountName = &details.Username
 		logon.Password = &details.Password
 		if details.AuthCode != "" {
 			logon.AuthCode = proto.String(details.AuthCode)
 		}
+
 		if details.TwoFactorCode != "" {
 			logon.TwoFactorCode = proto.String(details.TwoFactorCode)
 		}
-		logon.ClientLanguage = proto.String("english")
+
 		logon.ShaSentryfile = details.SentryFileHash
+
 		if details.LoginKey != "" {
 			logon.LoginKey = proto.String(details.LoginKey)
 		}
-		if details.ShouldRememberPassword {
-			logon.ShouldRememberPassword = proto.Bool(details.ShouldRememberPassword)
-		}
 
 		atomic.StoreUint64(&a.client.steamId, uint64(steamid.NewIdAdv(0, 1, int32(steamlang.EUniverse_Public), int32(steamlang.EAccountType_Individual))))
+	} else {
 
+		// FIXME: Add Instance type 1 as used above = Desktop 0 = All which is needed for anon
+		atomic.StoreUint64(&a.client.steamId, uint64(steamid.NewIdAdv(0, 0, int32(steamlang.EUniverse_Public), int32(steamlang.EAccountType_AnonUser))))
 	}
 
-	logon.ProtocolVersion = proto.Uint32(steamlang.MsgClientLogon_CurrentProtocol)
 	a.client.Write(protocol.NewClientMsgProtobuf(steamlang.EMsg_ClientLogon, logon))
 
 }
@@ -122,10 +129,15 @@ func (a *Auth) handleLogOnResponse(packet *protocol.Packet) {
 	msg := packet.ReadProtoMsg(body)
 
 	result := steamlang.EResult(body.GetEresult())
+
 	if result == steamlang.EResult_OK {
 		atomic.StoreInt32(&a.client.sessionId, msg.Header.Proto.GetClientSessionid())
 		atomic.StoreUint64(&a.client.steamId, msg.Header.Proto.GetSteamid())
-		a.client.Web.webLoginKey = *body.WebapiAuthenticateUserNonce
+
+		// FIXME: anon logon
+		if body.GetWebapiAuthenticateUserNonce() != "" {
+			a.client.Web.webLoginKey = *body.WebapiAuthenticateUserNonce
+		}
 
 		go a.client.heartbeatLoop(time.Duration(body.GetOutOfGameHeartbeatSeconds()))
 

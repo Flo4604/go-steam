@@ -28,13 +28,12 @@ const usage string = "usage: gsbot [username] [-p password] [-a authcode] [-t tw
 func main() {
 	details := &steam.LogOnDetails{
 		Username:               os.Args[1],
-		ShouldRememberPassword: true,
+		ShouldRememberPassword: false,
+		Anonymous:              true,
 	}
 
 	for i := 2; i < len(os.Args)-1; i += 2 {
 		switch os.Args[i] {
-		case "-anon":
-			details.Anonymous = true
 		case "-p":
 			details.Password = os.Args[i+1]
 		case "-a":
@@ -43,6 +42,8 @@ func main() {
 			details.TwoFactorCode = os.Args[i+1]
 		case "-l":
 			details.LoginKey = os.Args[i+1]
+		case "-anon":
+			details.Anonymous = true
 		default:
 			fmt.Println(usage)
 			return
