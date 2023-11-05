@@ -4,15 +4,18 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Flo4604/go-steam/go-steam/v3/protocol"
-	"github.com/Flo4604/go-steam/go-steam/v3/protocol/protobuf"
-	"github.com/Flo4604/go-steam/go-steam/v3/protocol/steamlang"
+	"github.com/Flo4604/go-steam/v3/protocol"
+	"github.com/Flo4604/go-steam/v3/protocol/protobuf"
+	"github.com/Flo4604/go-steam/v3/protocol/steamlang"
+	"google.golang.org/protobuf/proto"
 )
 
 type App struct {
 	client *Client
 
 	options *AppOptions
+
+	latestChangeNumber uint32
 }
 
 type AppOptions struct {
@@ -33,20 +36,9 @@ func (a *App) HandlePacket(packet *protocol.Packet) {
 	}
 }
 
-func (a *App) GetAppInfo(appId uint32) {
-
-}
-
-func (a *App) GetAppChangesSince(changedId uint32) {
-
-}
-
-func (a *App) GetProductInfo() {
-
-}
-
 func (a *App) getChangeListUpdate() {
 	if !a.options.EnablePicsCache || a.options.ChangelistUpdateInterval <= 0 {
+		println("PICS cache is disabled or update interval is 0, not updating changelist")
 		return
 	}
 
@@ -56,6 +48,14 @@ func (a *App) getChangeListUpdate() {
 		for {
 			select {
 			case <-ticker.C:
+				println("Updating changelist")
+
+				data := new(protobuf.CMsgClientPICSChangesSinceRequest)
+				data.SendAppInfoChanges = proto.Bool(true)
+				data.SendPackageInfoChanges = proto.Bool(true)
+				data.SinceChangeNumber = proto.Uint32(20785330)
+
+				a.client.Write(protocol.NewClientMsgProtobuf(steamlang.EMsg_ClientPICSChangesSinceRequest, data))
 
 			case <-quit:
 				ticker.Stop()
@@ -68,7 +68,7 @@ func (a *App) getChangeListUpdate() {
 
 func (a *App) handlePicsChangesSinceResponse(packet *protocol.Packet) {
 	if !packet.IsProto {
-		a.client.Fatalf("Got non-proto logon response!")
+		a.client.Fatalf("Got non-proto picsChangesSince response!")
 		return
 	}
 
@@ -81,14 +81,26 @@ func (a *App) handlePicsChangesSinceResponse(packet *protocol.Packet) {
 
 func (a *App) handlePicsProductInfoResponse(packet *protocol.Packet) {
 	if !packet.IsProto {
-		a.client.Fatalf("Got non-proto logon response!")
+		a.client.Fatalf("Got non-proto picsProductInfo response!")
 		return
 	}
 }
 
 func (a *App) handlePicsAccessTokenResponse(packet *protocol.Packet) {
 	if !packet.IsProto {
-		a.client.Fatalf("Got non-proto logon response!")
+		a.client.Fatalf("Got non-proto picsAccessToken response!")
 		return
 	}
+}
+
+func (a *App) GetAppInfo(appId uint32) {
+
+}
+
+func (a *App) GetAppChangesSince(changedId uint32) {
+
+}
+
+func (a *App) GetProductInfo() {
+
 }

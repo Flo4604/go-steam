@@ -5,10 +5,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/Flo4604/go-steam/go-steam/v3/protocol"
-	"github.com/Flo4604/go-steam/go-steam/v3/protocol/protobuf"
-	"github.com/Flo4604/go-steam/go-steam/v3/protocol/steamlang"
-	"github.com/Flo4604/go-steam/go-steam/v3/steamid"
+	"github.com/Flo4604/go-steam/v3/protocol"
+	"github.com/Flo4604/go-steam/v3/protocol/protobuf"
+	"github.com/Flo4604/go-steam/v3/protocol/steamlang"
+	"github.com/Flo4604/go-steam/v3/steamid"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -159,6 +159,9 @@ func (a *Auth) handleLogOnResponse(packet *protocol.Packet) {
 			NumLoginFailuresToMigrate: body.GetCountLoginfailuresToMigrate(),
 			NumDisconnectsToMigrate:   body.GetCountDisconnectsToMigrate(),
 		})
+
+		// We are logged on, start the ChangeListUpdate loop
+		a.client.App.getChangeListUpdate()
 	} else if result == steamlang.EResult_Fail || result == steamlang.EResult_ServiceUnavailable || result == steamlang.EResult_TryAnotherCM {
 		// some error on Steam's side, we'll get an EOF later
 	} else {

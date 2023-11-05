@@ -26,12 +26,12 @@ You can view the documentation with the [`godoc`](http://golang.org/cmd/godoc) t
 
 You should also take a look at the following sub-packages:
 
-  * [`gsbot`](http://godoc.org/github.com/Flo4604/go-steam/go-steam/gsbot) utilites that make writing bots easier
-  * [example bot](http://godoc.org/github.com/Flo4604/go-steam/go-steam/gsbot/gsbot) and [its source code](https://github.com/Flo4604/go-steam/go-steam/blob/master/gsbot/gsbot/gsbot.go)
-  * [`trade`](http://godoc.org/github.com/Flo4604/go-steam/go-steam/trade) for trading
-  * [`tradeoffer`](http://godoc.org/github.com/Flo4604/go-steam/go-steam/tradeoffer) for trade offers
-  * [`economy/inventory`](http://godoc.org/github.com/Flo4604/go-steam/go-steam/economy/inventory) for inventories
-  * [`tf2`](http://godoc.org/github.com/Flo4604/go-steam/go-steam/tf2) for Team Fortress 2 related things
+  * [`gsbot`](http://godoc.org/github.com/Flo4604/go-steam/gsbot) utilites that make writing bots easier
+  * [example bot](http://godoc.org/github.com/Flo4604/go-steam/gsbot/gsbot) and [its source code](https://github.com/Flo4604/go-steam/blob/master/gsbot/gsbot/gsbot.go)
+  * [`trade`](http://godoc.org/github.com/Flo4604/go-steam/trade) for trading
+  * [`tradeoffer`](http://godoc.org/github.com/Flo4604/go-steam/tradeoffer) for trade offers
+  * [`economy/inventory`](http://godoc.org/github.com/Flo4604/go-steam/economy/inventory) for inventories
+  * [`tf2`](http://godoc.org/github.com/Flo4604/go-steam/tf2) for Team Fortress 2 related things
 
 ## Working with go-steam
 
