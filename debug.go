@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/Flo4604/go-steam/v3/protocol"
+	"github.com/Flo4604/go-steam/v4/protocol"
 	"github.com/davecgh/go-spew/spew"
 )
 
