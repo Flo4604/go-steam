@@ -7,11 +7,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Flo4604/go-steam/v4/cache"
 	"github.com/Flo4604/go-steam/v4/protocol"
 	"github.com/Flo4604/go-steam/v4/protocol/protobuf"
 	"github.com/Flo4604/go-steam/v4/protocol/steamlang"
 	"github.com/Flo4604/go-steam/v4/rwu"
-	"github.com/Flo4604/go-steam/v4/socialcache"
 	"github.com/Flo4604/go-steam/v4/steamid"
 	"google.golang.org/protobuf/proto"
 )
@@ -24,18 +24,18 @@ type Social struct {
 	avatar       []byte
 	personaState steamlang.EPersonaState
 
-	Friends *socialcache.FriendsList
-	Groups  *socialcache.GroupsList
-	Chats   *socialcache.ChatsList
+	Friends *cache.FriendsList
+	Groups  *cache.GroupsList
+	Chats   *cache.ChatsList
 
 	client *Client
 }
 
 func newSocial(client *Client) *Social {
 	return &Social{
-		Friends: socialcache.NewFriendsList(),
-		Groups:  socialcache.NewGroupsList(),
-		Chats:   socialcache.NewChatsList(),
+		Friends: cache.NewFriendsList(),
+		Groups:  cache.NewGroupsList(),
+		Chats:   cache.NewChatsList(),
 		client:  client,
 	}
 }
@@ -262,7 +262,7 @@ func (s *Social) handleFriendsList(packet *protocol.Packet) {
 			if rel == steamlang.EClanRelationship_None {
 				s.Groups.Remove(steamId)
 			} else {
-				s.Groups.Add(socialcache.Group{
+				s.Groups.Add(cache.Group{
 					SteamId:      steamId,
 					Relationship: rel,
 				})
@@ -276,7 +276,7 @@ func (s *Social) handleFriendsList(packet *protocol.Packet) {
 			if rel == steamlang.EFriendRelationship_None {
 				s.Friends.Remove(steamId)
 			} else {
-				s.Friends.Add(socialcache.Friend{
+				s.Friends.Add(cache.Friend{
 					SteamId:      steamId,
 					Relationship: rel,
 				})
@@ -477,11 +477,11 @@ func (s *Social) handleChatEnter(packet *protocol.Packet) {
 	count := body.NumMembers
 	chatId := steamid.SteamId(body.SteamIdChat)
 	clanId := steamid.SteamId(body.SteamIdClan)
-	s.Chats.Add(socialcache.Chat{SteamId: chatId, GroupId: clanId})
+	s.Chats.Add(cache.Chat{SteamId: chatId, GroupId: clanId})
 	for i := 0; i < int(count); i++ {
 		id, chatPerm, clanPerm := readChatMember(reader)
 		rwu.ReadBytes(reader, 6) // No idea what this is
-		s.Chats.AddChatMember(chatId, socialcache.ChatMember{
+		s.Chats.AddChatMember(chatId, cache.ChatMember{
 			SteamId:         steamid.SteamId(id),
 			ChatPermissions: chatPerm,
 			ClanPermissions: clanPerm,
@@ -512,7 +512,7 @@ func (s *Social) handleChatMemberInfo(packet *protocol.Packet) {
 		stateChange := steamlang.EChatMemberStateChange(state)
 		if stateChange == steamlang.EChatMemberStateChange_Entered {
 			_, chatPerm, clanPerm := readChatMember(reader)
-			s.Chats.AddChatMember(chatId, socialcache.ChatMember{
+			s.Chats.AddChatMember(chatId, cache.ChatMember{
 				SteamId:         steamid.SteamId(actedOn),
 				ChatPermissions: chatPerm,
 				ClanPermissions: clanPerm,

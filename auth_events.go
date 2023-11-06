@@ -30,6 +30,11 @@ type LogOnFailedEvent struct {
 	Result steamlang.EResult
 }
 
+type SteamGuardEvent struct {
+	Domain        string // Email domain if needed
+	LastCodeWrong bool
+}
+
 type LoginKeyEvent struct {
 	UniqueId uint32
 	LoginKey string

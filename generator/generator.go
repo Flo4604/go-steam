@@ -46,8 +46,6 @@ func main() {
 func clean() {
 	print("# Cleaning")
 	cleanGlob("../protocol/**/*.pb.go")
-	cleanGlob("../tf2/protocol/**/*.pb.go")
-	cleanGlob("../dota/protocol/**/*.pb.go")
 	cleanGlob("../csgo/protocol/**/*.pb.go")
 
 	os.Remove("../protocol/steamlang/enums.go")
@@ -66,7 +64,7 @@ func cleanGlob(pattern string) {
 
 func buildSteamLanguage() {
 	print("# Building Steam Language")
-	execute("dotnet", []string{"run", "-c", "release", "-p", "./GoSteamLanguageGenerator", "./SteamKit", "../protocol/steamlang"})
+	execute("dotnet", []string{"run", "-c", "release", "--project", "./GoSteamLanguageGenerator", "./SteamKit", "../protocol/steamlang"})
 	execute("gofmt", []string{"-w", "../protocol/steamlang/enums.go", "../protocol/steamlang/messages.go"})
 }
 
@@ -74,8 +72,6 @@ func buildProto() {
 	print("# Building Protobufs")
 
 	buildProtoMap("steam", clientProtoFiles, "../protocol/protobuf")
-	buildProtoMap("tf2", tf2ProtoFiles, "../tf2/protocol/protobuf")
-	buildProtoMap("dota2", dotaProtoFiles, "../dota/protocol/protobuf")
 	buildProtoMap("csgo", csgoProtoFiles, "../csgo/protocol/protobuf")
 }
 
@@ -89,10 +85,6 @@ func buildProtoMap(srcSubdir string, files map[string]string, outDir string) {
 	for proto := range files {
 		opt = append(opt, "--go_opt=Msteammessages.proto=Protobufs/"+srcSubdir+"/steammessages.proto")
 		opt = append(opt, "--go_opt=M"+proto+"=Protobufs/"+srcSubdir+"/"+proto)
-	}
-
-	if srcSubdir == "dota2" {
-		opt = append(opt, "--go_opt=Mecon_shared_enums.proto=Protobufs/"+srcSubdir+"/econ_shared_enums.proto")
 	}
 
 	for proto, out := range files {
@@ -110,10 +102,15 @@ var clientProtoFiles = map[string]string{
 	"encrypted_app_ticket.proto": "app_ticket.pb.go",
 
 	"steammessages_clientserver.proto":         "client_server.pb.go",
+	"steammessages_clientserver_appinfo.proto": "client_server_appinfo.pb.go",
 	"steammessages_clientserver_2.proto":       "client_server_2.pb.go",
 	"steammessages_clientserver_friends.proto": "client_server_friends.pb.go",
 	"steammessages_clientserver_login.proto":   "client_server_login.pb.go",
 	"steammessages_sitelicenseclient.proto":    "client_site_license.pb.go",
+	"enums_productinfo.proto":                  "enums_productinfo.pb.go",
+	"enums.proto":                              "enums.pb.go",
+	"offline_ticket.proto":                     "offline_ticket.pb.go",
+	"steammessages_client_objects.proto":       "steammessages_client_objects.pb.go",
 
 	"content_manifest.proto": "content_manifest.pb.go",
 
@@ -129,25 +126,8 @@ var clientProtoFiles = map[string]string{
 	"steammessages_publishedfile.steamclient.proto":     "unified/publishedfile.pb.go",
 }
 
-var tf2ProtoFiles = map[string]string{
-	"base_gcmessages.proto":  "base.pb.go",
-	"econ_gcmessages.proto":  "econ.pb.go",
-	"gcsdk_gcmessages.proto": "gcsdk.pb.go",
-	"tf_gcmessages.proto":    "tf.pb.go",
-	"gcsystemmsgs.proto":     "system.pb.go",
-}
-
-var dotaProtoFiles = map[string]string{
-	"base_gcmessages.proto":   "base.pb.go",
-	"econ_shared_enums.proto": "econ_shared_enum.pb.go",
-	"econ_gcmessages.proto":   "econ.pb.go",
-	"gcsdk_gcmessages.proto":  "gcsdk.pb.go",
-	"gcsystemmsgs.proto":      "system.pb.go",
-	"steammessages.proto":     "steam.pb.go",
-}
-
 var csgoProtoFiles = map[string]string{
-	"base_gcmessages.proto":        "base.pb.go",
+	// "base_gcmessages.proto":        "base.pb.go",
 	"cstrike15_gcmessages.proto":   "cstrike15gc.pb.go",
 	"cstrike15_usermessages.proto": "cstrike15user.pb.go",
 	"econ_gcmessages.proto":        "econ.pb.go",
@@ -159,6 +139,7 @@ var csgoProtoFiles = map[string]string{
 	"network_connection.proto":     "networkconnection.pb.go",
 	"steammessages.proto":          "steam.pb.go",
 	"uifontfile_format.proto":      "uifontfile.pb.go",
+	"networkbasetypes.proto":       "networkbasetypes.pb.go",
 }
 
 func compileProto(srcBase, srcSubdir, proto, target string, opt []string) {

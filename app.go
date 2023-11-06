@@ -76,7 +76,7 @@ func (a *App) handlePicsChangesSinceResponse(packet *protocol.Packet) {
 	msg := packet.ReadProtoMsg(body)
 
 	// dump the msg
-	fmt.Printf("%+v\n", msg)
+	fmt.Printf("handlePicsChangesSinceResponse %+v\n", msg)
 }
 
 func (a *App) handlePicsProductInfoResponse(packet *protocol.Packet) {

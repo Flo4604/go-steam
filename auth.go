@@ -2,6 +2,7 @@ package steam
 
 import (
 	"crypto/sha1"
+	"fmt"
 	"sync/atomic"
 	"time"
 
@@ -54,6 +55,8 @@ type LogOnDetails struct {
 // After the event EMsg_ClientNewLoginKey is received you can use the LoginKey
 // to login instead of using the password.
 func (a *Auth) LogOn(details *LogOnDetails) {
+	// FIXME: Check for connection, if not connected we should wait for it...
+
 	if !details.Anonymous && details.Username == "" {
 		panic("Username must be set!")
 	}
@@ -66,17 +69,15 @@ func (a *Auth) LogOn(details *LogOnDetails) {
 	logon.ProtocolVersion = proto.Uint32(steamlang.MsgClientLogon_CurrentProtocol)
 	logon.MachineName = proto.String("") //FIXME: Allow passing in of machine name
 	logon.ShouldRememberPassword = proto.Bool(details.ShouldRememberPassword)
-	logon.SupportsRateLimitResponse = proto.Bool(false) // FIXME: This is true when not anon login
-	logon.ClientLanguage = proto.String("")
-	logon.AnonUserTargetAccountName = proto.String(details.Username)
 	logon.ClientOsType = proto.Uint32(203) // FIXME: Add actual OS // Allow passing in OS
-	logon.CellId = proto.Uint32(0)         // FIXME: Add actual CellID
+	logon.CellId = proto.Uint32(92)        // FIXME: Add actual CellID
 
 	if !details.Anonymous {
 		logon.ClientLanguage = proto.String("english")
 
-		logon.AccountName = &details.Username
-		logon.Password = &details.Password
+		logon.AccountName = proto.String(details.Username)
+		logon.Password = proto.String(details.Password)
+
 		if details.AuthCode != "" {
 			logon.AuthCode = proto.String(details.AuthCode)
 		}
@@ -91,17 +92,28 @@ func (a *Auth) LogOn(details *LogOnDetails) {
 			logon.LoginKey = proto.String(details.LoginKey)
 		}
 
+		logon.SupportsRateLimitResponse = proto.Bool(true)
+
 		atomic.StoreUint64(&a.client.steamId, uint64(steamid.NewIdAdv(0, 1, int32(steamlang.EUniverse_Public), int32(steamlang.EAccountType_Individual))))
 	} else {
+		logon.SupportsRateLimitResponse = proto.Bool(false)
+		logon.AnonUserTargetAccountName = proto.String(details.Username)
+		logon.ClientLanguage = proto.String("")
+
 		// FIXME: Add Instance type 1 as used above = Desktop 0 = All which is needed for anon
 		atomic.StoreUint64(&a.client.steamId, uint64(steamid.NewIdAdv(0, 0, int32(steamlang.EUniverse_Public), int32(steamlang.EAccountType_AnonUser))))
 	}
 
-	a.client.Write(protocol.NewClientMsgProtobuf(steamlang.EMsg_ClientLogon, logon))
+	// print login details
+	fmt.Printf("logon: %v\n", logon)
 
+	a.client.Write(protocol.NewClientMsgProtobuf(steamlang.EMsg_ClientLogon, logon))
 }
 
 func (a *Auth) HandlePacket(packet *protocol.Packet) {
+	if a.client.Debug.options.Enabled {
+		println("Auth got packet: ", packet.EMsg)
+	}
 	switch packet.EMsg {
 	case steamlang.EMsg_ClientLogOnResponse:
 		a.handleLogOnResponse(packet)
@@ -128,43 +140,48 @@ func (a *Auth) handleLogOnResponse(packet *protocol.Packet) {
 
 	result := steamlang.EResult(body.GetEresult())
 
-	if result == steamlang.EResult_OK {
-		atomic.StoreInt32(&a.client.sessionId, msg.Header.Proto.GetClientSessionid())
-		atomic.StoreUint64(&a.client.steamId, msg.Header.Proto.GetSteamid())
+	switch result {
+	case steamlang.EResult_OK:
+		{
+			atomic.StoreInt32(&a.client.sessionId, msg.Header.Proto.GetClientSessionid())
+			atomic.StoreUint64(&a.client.steamId, msg.Header.Proto.GetSteamid())
 
-		// FIXME: anon logon
-		if body.GetWebapiAuthenticateUserNonce() != "" {
-			a.client.Web.webLoginKey = *body.WebapiAuthenticateUserNonce
+			go a.client.heartbeatLoop(time.Duration(body.GetLegacyOutOfGameHeartbeatSeconds()))
+
+			a.client.Emit(&LoggedOnEvent{
+				Result:                    steamlang.EResult(body.GetEresult()),
+				ExtendedResult:            steamlang.EResult(body.GetEresultExtended()),
+				OutOfGameSecsPerHeartbeat: body.GetLegacyOutOfGameHeartbeatSeconds(),
+				InGameSecsPerHeartbeat:    body.GetHeartbeatSeconds(),
+				PublicIp:                  body.GetDeprecatedPublicIp(),
+				ServerTime:                body.GetRtime32ServerTime(),
+				AccountFlags:              steamlang.EAccountFlags(body.GetAccountFlags()),
+				ClientSteamId:             steamid.SteamId(body.GetClientSuppliedSteamid()),
+				EmailDomain:               body.GetEmailDomain(),
+				CellId:                    body.GetCellId(),
+				CellIdPingThreshold:       body.GetCellIdPingThreshold(),
+				Steam2Ticket:              body.GetSteam2Ticket(),
+				UsePics:                   body.GetDeprecatedUsePics(),
+				IpCountryCode:             body.GetIpCountryCode(),
+				VanityUrl:                 body.GetVanityUrl(),
+				NumLoginFailuresToMigrate: body.GetCountLoginfailuresToMigrate(),
+				NumDisconnectsToMigrate:   body.GetCountDisconnectsToMigrate(),
+			})
+
+			// We are logged on, start the ChangeListUpdate loop
+			a.client.App.getChangeListUpdate()
 		}
-
-		go a.client.heartbeatLoop(time.Duration(body.GetOutOfGameHeartbeatSeconds()))
-
-		a.client.Emit(&LoggedOnEvent{
-			Result:                    steamlang.EResult(body.GetEresult()),
-			ExtendedResult:            steamlang.EResult(body.GetEresultExtended()),
-			OutOfGameSecsPerHeartbeat: body.GetOutOfGameHeartbeatSeconds(),
-			InGameSecsPerHeartbeat:    body.GetInGameHeartbeatSeconds(),
-			PublicIp:                  body.GetDeprecatedPublicIp(),
-			ServerTime:                body.GetRtime32ServerTime(),
-			AccountFlags:              steamlang.EAccountFlags(body.GetAccountFlags()),
-			ClientSteamId:             steamid.SteamId(body.GetClientSuppliedSteamid()),
-			EmailDomain:               body.GetEmailDomain(),
-			CellId:                    body.GetCellId(),
-			CellIdPingThreshold:       body.GetCellIdPingThreshold(),
-			Steam2Ticket:              body.GetSteam2Ticket(),
-			UsePics:                   body.GetDeprecatedUsePics(),
-			WebApiUserNonce:           body.GetWebapiAuthenticateUserNonce(),
-			IpCountryCode:             body.GetIpCountryCode(),
-			VanityUrl:                 body.GetVanityUrl(),
-			NumLoginFailuresToMigrate: body.GetCountLoginfailuresToMigrate(),
-			NumDisconnectsToMigrate:   body.GetCountDisconnectsToMigrate(),
+	case steamlang.EResult_Fail, steamlang.EResult_ServiceUnavailable, steamlang.EResult_TryAnotherCM:
+		return
+	case steamlang.EResult_AccountLogonDenied, steamlang.EResult_AccountLoginDeniedNeedTwoFactor, steamlang.EResult_TwoFactorCodeMismatch:
+		// We have to login with either an email code or a 2FA code
+		a.client.Emit(&SteamGuardEvent{
+			Domain:        body.GetEmailDomain(),
+			LastCodeWrong: result == steamlang.EResult_TwoFactorCodeMismatch,
 		})
-
-		// We are logged on, start the ChangeListUpdate loop
-		a.client.App.getChangeListUpdate()
-	} else if result == steamlang.EResult_Fail || result == steamlang.EResult_ServiceUnavailable || result == steamlang.EResult_TryAnotherCM {
-		// some error on Steam's side, we'll get an EOF later
-	} else {
+		a.client.Disconnect()
+	default:
+		println("Logon result: ", result)
 		a.client.Emit(&LogOnFailedEvent{
 			Result: steamlang.EResult(body.GetEresult()),
 		})

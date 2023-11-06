@@ -662,65 +662,6 @@ func (d *MsgChannelEncryptResult) Deserialize(r io.Reader) error {
 	return err
 }
 
-type MsgClientNewLoginKey struct {
-	UniqueID uint32
-	LoginKey []uint8
-}
-
-func NewMsgClientNewLoginKey() *MsgClientNewLoginKey {
-	return &MsgClientNewLoginKey{
-		LoginKey: make([]uint8, 20, 20),
-	}
-}
-
-func (d *MsgClientNewLoginKey) GetEMsg() EMsg {
-	return EMsg_ClientNewLoginKey
-}
-
-func (d *MsgClientNewLoginKey) Serialize(w io.Writer) error {
-	var err error
-	err = binary.Write(w, binary.LittleEndian, d.UniqueID)
-	if err != nil {
-		return err
-	}
-	err = binary.Write(w, binary.LittleEndian, d.LoginKey)
-	return err
-}
-
-func (d *MsgClientNewLoginKey) Deserialize(r io.Reader) error {
-	var err error
-	d.UniqueID, err = rwu.ReadUint32(r)
-	if err != nil {
-		return err
-	}
-	err = binary.Read(r, binary.LittleEndian, d.LoginKey)
-	return err
-}
-
-type MsgClientNewLoginKeyAccepted struct {
-	UniqueID uint32
-}
-
-func NewMsgClientNewLoginKeyAccepted() *MsgClientNewLoginKeyAccepted {
-	return &MsgClientNewLoginKeyAccepted{}
-}
-
-func (d *MsgClientNewLoginKeyAccepted) GetEMsg() EMsg {
-	return EMsg_ClientNewLoginKeyAccepted
-}
-
-func (d *MsgClientNewLoginKeyAccepted) Serialize(w io.Writer) error {
-	var err error
-	err = binary.Write(w, binary.LittleEndian, d.UniqueID)
-	return err
-}
-
-func (d *MsgClientNewLoginKeyAccepted) Deserialize(r io.Reader) error {
-	var err error
-	d.UniqueID, err = rwu.ReadUint32(r)
-	return err
-}
-
 const (
 	MsgClientLogon_ObfuscationMask                                      uint32 = 0xBAADF00D
 	MsgClientLogon_CurrentProtocol                                      uint32 = 65580
@@ -839,48 +780,6 @@ func (d *MsgClientAppUsageEvent) Deserialize(r io.Reader) error {
 	return err
 }
 
-type MsgClientEmailAddrInfo struct {
-	PasswordStrength           uint32
-	FlagsAccountSecurityPolicy uint32
-	Validated                  bool
-}
-
-func NewMsgClientEmailAddrInfo() *MsgClientEmailAddrInfo {
-	return &MsgClientEmailAddrInfo{}
-}
-
-func (d *MsgClientEmailAddrInfo) GetEMsg() EMsg {
-	return EMsg_ClientEmailAddrInfo
-}
-
-func (d *MsgClientEmailAddrInfo) Serialize(w io.Writer) error {
-	var err error
-	err = binary.Write(w, binary.LittleEndian, d.PasswordStrength)
-	if err != nil {
-		return err
-	}
-	err = binary.Write(w, binary.LittleEndian, d.FlagsAccountSecurityPolicy)
-	if err != nil {
-		return err
-	}
-	err = rwu.WriteBool(w, d.Validated)
-	return err
-}
-
-func (d *MsgClientEmailAddrInfo) Deserialize(r io.Reader) error {
-	var err error
-	d.PasswordStrength, err = rwu.ReadUint32(r)
-	if err != nil {
-		return err
-	}
-	d.FlagsAccountSecurityPolicy, err = rwu.ReadUint32(r)
-	if err != nil {
-		return err
-	}
-	d.Validated, err = rwu.ReadBool(r)
-	return err
-}
-
 type MsgClientUpdateGuestPassesList struct {
 	Result                   EResult
 	CountGuestPassesToGive   int32
@@ -921,30 +820,6 @@ func (d *MsgClientUpdateGuestPassesList) Deserialize(r io.Reader) error {
 		return err
 	}
 	d.CountGuestPassesToRedeem, err = rwu.ReadInt32(r)
-	return err
-}
-
-type MsgClientRequestedClientStats struct {
-	CountStats int32
-}
-
-func NewMsgClientRequestedClientStats() *MsgClientRequestedClientStats {
-	return &MsgClientRequestedClientStats{}
-}
-
-func (d *MsgClientRequestedClientStats) GetEMsg() EMsg {
-	return EMsg_ClientRequestedClientStats
-}
-
-func (d *MsgClientRequestedClientStats) Serialize(w io.Writer) error {
-	var err error
-	err = binary.Write(w, binary.LittleEndian, d.CountStats)
-	return err
-}
-
-func (d *MsgClientRequestedClientStats) Deserialize(r io.Reader) error {
-	var err error
-	d.CountStats, err = rwu.ReadInt32(r)
 	return err
 }
 
@@ -2419,5 +2294,72 @@ func (d *MsgClientMarketingMessageUpdate2) Deserialize(r io.Reader) error {
 		return err
 	}
 	d.Count, err = rwu.ReadUint32(r)
+	return err
+}
+
+type MsgClientGetLegacyGameKey struct {
+	AppId uint32
+}
+
+func NewMsgClientGetLegacyGameKey() *MsgClientGetLegacyGameKey {
+	return &MsgClientGetLegacyGameKey{}
+}
+
+func (d *MsgClientGetLegacyGameKey) GetEMsg() EMsg {
+	return EMsg_ClientGetLegacyGameKey
+}
+
+func (d *MsgClientGetLegacyGameKey) Serialize(w io.Writer) error {
+	var err error
+	err = binary.Write(w, binary.LittleEndian, d.AppId)
+	return err
+}
+
+func (d *MsgClientGetLegacyGameKey) Deserialize(r io.Reader) error {
+	var err error
+	d.AppId, err = rwu.ReadUint32(r)
+	return err
+}
+
+type MsgClientGetLegacyGameKeyResponse struct {
+	AppId  uint32
+	Result EResult
+	Length uint32
+}
+
+func NewMsgClientGetLegacyGameKeyResponse() *MsgClientGetLegacyGameKeyResponse {
+	return &MsgClientGetLegacyGameKeyResponse{}
+}
+
+func (d *MsgClientGetLegacyGameKeyResponse) GetEMsg() EMsg {
+	return EMsg_ClientGetLegacyGameKeyResponse
+}
+
+func (d *MsgClientGetLegacyGameKeyResponse) Serialize(w io.Writer) error {
+	var err error
+	err = binary.Write(w, binary.LittleEndian, d.AppId)
+	if err != nil {
+		return err
+	}
+	err = binary.Write(w, binary.LittleEndian, d.Result)
+	if err != nil {
+		return err
+	}
+	err = binary.Write(w, binary.LittleEndian, d.Length)
+	return err
+}
+
+func (d *MsgClientGetLegacyGameKeyResponse) Deserialize(r io.Reader) error {
+	var err error
+	d.AppId, err = rwu.ReadUint32(r)
+	if err != nil {
+		return err
+	}
+	t0, err := rwu.ReadInt32(r)
+	if err != nil {
+		return err
+	}
+	d.Result = EResult(t0)
+	d.Length, err = rwu.ReadUint32(r)
 	return err
 }

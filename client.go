@@ -228,6 +228,7 @@ func (c *Client) Write(msg protocol.IMsg) {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 	if c.conn == nil {
+		println("Write: not connected")
 		return
 	}
 	c.writeChan <- msg
