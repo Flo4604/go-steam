@@ -98,7 +98,19 @@ func main() {
 			client.Connect()
 		case *csgo.GCReadyEvent:
 			println("GC is ready!")
-			cs.GetPlayerProfile(845829334)
+
+			for i := 0; i < 3; i++ {
+				go func(ii int) {
+					response, err := cs.GetPlayerProfile(845829334)
+					if err != nil {
+						fmt.Println("Error:", err, fmt.Sprintf("i: %d", ii))
+					} else {
+						fmt.Println("Received response:", response, fmt.Sprintf("i: %d", ii))
+					}
+				}(i)
+			}
+		case *csgo.PlayerProfileEvent:
+			fmt.Printf("!!!!!!!!!!Player profile: %+v\n", e)
 		case error:
 			fmt.Printf("Error: %v", e)
 		default:

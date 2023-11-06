@@ -45,7 +45,8 @@ func (n *Notifications) handleClientUserNotifications(packet *protocol.Packet) {
 	}
 
 	// check if there is a notification in our map that isn't in the current packet
-	for typ, _ := range n.notifications {
+
+	for typ := range n.notifications {
 		exists := false
 		for _, t := range msg.GetNotifications() {
 			if NotificationType(*t.UserNotificationType) == typ {

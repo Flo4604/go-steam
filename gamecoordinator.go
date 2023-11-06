@@ -67,8 +67,13 @@ func (g *GameCoordinator) Write(msg gamecoordinator.IGCMsg) {
 
 // Sets you in the given games. Specify none to quit all games.
 func (g *GameCoordinator) SetGamesPlayed(appIds ...uint64) {
-	games := make([]*protobuf.CMsgClientGamesPlayed_GamePlayed, 0)
+	games := make([]*protobuf.CMsgClientGamesPlayed_GamePlayed, 32)
 	for _, appId := range appIds {
+		// check if we have enough space
+		if len(games) == 32 {
+			break
+		}
+
 		games = append(games, &protobuf.CMsgClientGamesPlayed_GamePlayed{
 			GameId: proto.Uint64(appId),
 		})
