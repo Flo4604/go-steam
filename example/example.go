@@ -10,7 +10,7 @@
 // Mobile code:  username + password + twofactorcode
 //               username + loginkey
 //
-//     gsbot [username] [-p password] [-a authcode] [-t twofactorcode] [-l loginkey]
+//     example [username] [-p password] [-a authcode] [-t twofactorcode] [-l loginkey]
 
 package main
 
