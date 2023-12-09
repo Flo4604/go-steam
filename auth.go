@@ -112,8 +112,9 @@ func (a *Auth) LogOn(details *LogOnDetails) {
 
 func (a *Auth) HandlePacket(packet *protocol.Packet) {
 	if a.client.Debug.options.Enabled {
-		println("Auth got packet: ", packet.EMsg)
+		println("Auth got packet: ", packet.EMsg, packet.EMsg.String())
 	}
+
 	switch packet.EMsg {
 	case steamlang.EMsg_ClientLogOnResponse:
 		a.handleLogOnResponse(packet)
@@ -243,3 +244,5 @@ func (a *Auth) handleAccountInfo(packet *protocol.Packet) {
 		FacebookName:         body.GetFacebookName(),
 	})
 }
+
+// new login stuff
