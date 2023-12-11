@@ -12,5 +12,8 @@ type HTTPTransport struct {
 	WebClient *httpClient.Client
 }
 
-func (h *HTTPTransport) sendRequest() {
+func (h HTTPTransport) sendRequest() {
+}
+
+func (h HTTPTransport) Close() {
 }
