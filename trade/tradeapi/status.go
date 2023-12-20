@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/Flo4604/go-steam/jsont"
-	"github.com/Flo4604/go-steam/steamid"
+	"github.com/Flo4604/go-steam/v5/jsont"
+	"github.com/Flo4604/go-steam/v5/steamid"
 )
 
 type Status struct {

@@ -19,9 +19,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Flo4604/go-steam"
-	"github.com/Flo4604/go-steam/csgo"
-	"github.com/Flo4604/go-steam/protocol/steamlang"
+	"github.com/Flo4604/go-steam/v5"
+	"github.com/Flo4604/go-steam/v5/csgo"
+	"github.com/Flo4604/go-steam/v5/protocol/steamlang"
 )
 
 // const usage string = "usage: example [username] [-p password] [-a authcode] [-t twofactorcode] [-l loginkey] [-anon]"
