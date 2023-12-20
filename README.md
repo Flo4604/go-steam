@@ -17,7 +17,7 @@ If this is useful to you, there's also the [go-steamapi](https://github.com/Flo4
 
 ## Installation
 
-    go get github.com/Flo4604/go-steam/go-steam
+    go get github.com/Flo4604/go-steam
 
 ## Usage
 

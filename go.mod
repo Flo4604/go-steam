@@ -1,4 +1,4 @@
-module github.com/Flo4604/go-steam/v4
+module github.com/Flo4604/go-steam
 
 go 1.16
 

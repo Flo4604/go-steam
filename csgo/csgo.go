@@ -9,9 +9,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Flo4604/go-steam/v4"
-	"github.com/Flo4604/go-steam/v4/csgo/protocol/protobuf"
-	"github.com/Flo4604/go-steam/v4/protocol/gamecoordinator"
+	"github.com/Flo4604/go-steam"
+	"github.com/Flo4604/go-steam/csgo/protocol/protobuf"
+	"github.com/Flo4604/go-steam/protocol/gamecoordinator"
 )
 
 const AppId = 730

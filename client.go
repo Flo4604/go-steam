@@ -13,12 +13,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/Flo4604/go-steam/v4/cryptoutil"
-	"github.com/Flo4604/go-steam/v4/netutil"
-	"github.com/Flo4604/go-steam/v4/protocol"
-	"github.com/Flo4604/go-steam/v4/protocol/protobuf"
-	"github.com/Flo4604/go-steam/v4/protocol/steamlang"
-	"github.com/Flo4604/go-steam/v4/steamid"
+	"github.com/Flo4604/go-steam/cryptoutil"
+	"github.com/Flo4604/go-steam/netutil"
+	"github.com/Flo4604/go-steam/protocol"
+	"github.com/Flo4604/go-steam/protocol/protobuf"
+	"github.com/Flo4604/go-steam/protocol/steamlang"
+	"github.com/Flo4604/go-steam/steamid"
 )
 
 // Represents a client to the Steam network.

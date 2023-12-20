@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Flo4604/go-steam/v4/protocol"
-	"github.com/Flo4604/go-steam/v4/protocol/protobuf"
-	"github.com/Flo4604/go-steam/v4/protocol/steamlang"
+	"github.com/Flo4604/go-steam/protocol"
+	"github.com/Flo4604/go-steam/protocol/protobuf"
+	"github.com/Flo4604/go-steam/protocol/steamlang"
 	"google.golang.org/protobuf/proto"
 )
 
