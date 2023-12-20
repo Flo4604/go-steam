@@ -1,10 +1,5 @@
-github.com/Flo4604/go-steam v1.0.0 h1:yPN91N789bUy1wiMB1qE/55NkNHWwWXNK7uuV5Qeh9Q=
-github.com/Flo4604/go-steam v1.0.0/go.mod h1:YyEFdiOmJSd7oz5Aq6Fd0iAC/zo5/vAja6pgJZlh3Nw=
-github.com/Philipp15b/go-steam v1.0.0 h1:nBGLVJRyDukX9dfcMFKbQbE2g6doh7e/IZFDDP3S9pY=
-github.com/Philipp15b/go-steam v1.0.0/go.mod h1:HuVM+sZFzumUdKPWiz+IlCMb4RdsKdT3T+nQBKL+sYg=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/golang/protobuf v1.5.0 h1:LUVKkCeviFUMKqHa4tXIIij/lbhnMbP7Fn5wKdKkRh4=
 github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaSAoJOfIk=
 github.com/google/go-cmp v0.5.5 h1:Khx7svrCpmxxtHBq5j2mp/xVjsi8hQMfNLvJFAlrGgU=
 github.com/google/go-cmp v0.5.5/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
