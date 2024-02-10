@@ -5,12 +5,18 @@ import (
 	"crypto/cipher"
 	"encoding/binary"
 	"fmt"
+	"github.com/Philipp15b/go-steam/v3/cryptoutil"
+	"github.com/Philipp15b/go-steam/v3/protocol"
+	"golang.org/x/net/proxy"
 	"io"
 	"net"
 	"sync"
+<<<<<<< HEAD
 
 	"github.com/Flo4604/go-steam/v5/cryptoutil"
 	"github.com/Flo4604/go-steam/v5/protocol"
+=======
+>>>>>>> b62ef4b8e056faa3c81c1426cc41fd1c18686069
 )
 
 type connection interface {
@@ -29,8 +35,21 @@ type tcpConnection struct {
 	cipherMutex sync.RWMutex
 }
 
-func dialTCP(laddr, raddr *net.TCPAddr) (*tcpConnection, error) {
-	conn, err := net.DialTCP("tcp", laddr, raddr)
+// dialTCP with an optional proxy dialer
+func dialTCP(maybeProxyDialer *proxy.Dialer, laddr, raddr *net.TCPAddr) (*tcpConnection, error) {
+	var conn *net.TCPConn
+	var err error
+	if maybeProxyDialer != nil {
+		gConn, err := (*maybeProxyDialer).Dial("tcp", raddr.String())
+		if err != nil {
+			return nil, err
+		}
+
+		conn = gConn.(*net.TCPConn)
+	} else {
+		conn, err = net.DialTCP("tcp", laddr, raddr)
+	}
+
 	if err != nil {
 		return nil, err
 	}
