@@ -139,6 +139,15 @@ func (a *Auth) handleLogOnResponse(packet *protocol.Packet) {
 	msg := packet.ReadProtoMsg(body)
 
 	result := steamlang.EResult(body.GetEresult())
+<<<<<<< HEAD
+=======
+	if result == steamlang.EResult_OK {
+		atomic.StoreInt32(&a.client.sessionId, msg.Header.Proto.GetClientSessionid())
+		atomic.StoreUint64(&a.client.steamId, msg.Header.Proto.GetSteamid())
+		if body.WebapiAuthenticateUserNonce != nil {
+			a.client.Web.webLoginKey = *body.WebapiAuthenticateUserNonce
+		}
+>>>>>>> b62ef4b8e056faa3c81c1426cc41fd1c18686069
 
 	switch result {
 	case steamlang.EResult_OK:
