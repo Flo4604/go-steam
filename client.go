@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"golang.org/x/net/proxy"
 	"hash/crc32"
-	"io/ioutil"
+	"io"
 	"net"
 	"sync"
 	"sync/atomic"
@@ -238,6 +238,9 @@ func (c *Client) Write(msg protocol.IMsg) {
 		cm.SetSessionId(c.SessionId())
 		cm.SetSteamId(c.SteamId())
 	}
+	println("Write1: ", msg.GetMsgType().String())
+
+	fmt.Printf("%+v\n", msg)
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 	if c.conn == nil {
@@ -279,6 +282,10 @@ func (c *Client) writeLoop() {
 		if !ok {
 			return
 		}
+
+		println("Write: ", msg.GetMsgType().String())
+
+		fmt.Printf("%+v\n", msg)
 
 		err := msg.Serialize(c.writeBuf)
 		if err != nil {
@@ -382,7 +389,7 @@ func (c *Client) handleMulti(packet *protocol.Packet) {
 			return
 		}
 
-		payload, err = ioutil.ReadAll(r)
+		payload, err = io.ReadAll(r)
 		if err != nil {
 			c.Errorf("handleMulti: Error while decompressing: %v", err)
 			return
@@ -411,8 +418,8 @@ func (c *Client) handleClientCMList(packet *protocol.Packet) {
 	l := make([]*netutil.PortAddr, 0)
 	for i, ip := range body.GetCmAddresses() {
 		l = append(l, &netutil.PortAddr{
-			readIp(ip),
-			uint16(body.GetCmPorts()[i]),
+			IP:   readIp(ip),
+			Port: uint16(body.GetCmPorts()[i]),
 		})
 	}
 

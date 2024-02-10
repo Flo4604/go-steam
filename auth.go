@@ -112,13 +112,14 @@ func (a *Auth) LogOn(details *LogOnDetails) {
 
 func (a *Auth) HandlePacket(packet *protocol.Packet) {
 	if a.client.Debug.options.Enabled {
-		println("Auth got packet: ", packet.EMsg)
+		println("Got: ", packet.EMsg.String())
+
+		fmt.Printf("%+v\n", packet)
 	}
+
 	switch packet.EMsg {
 	case steamlang.EMsg_ClientLogOnResponse:
 		a.handleLogOnResponse(packet)
-	case steamlang.EMsg_ClientNewLoginKey:
-		a.handleLoginKey(packet)
 	case steamlang.EMsg_ClientSessionToken:
 	case steamlang.EMsg_ClientLoggedOff:
 		a.handleLoggedOff(packet)
@@ -189,18 +190,6 @@ func (a *Auth) handleLogOnResponse(packet *protocol.Packet) {
 	}
 }
 
-func (a *Auth) handleLoginKey(packet *protocol.Packet) {
-	body := new(protobuf.CMsgClientNewLoginKey)
-	packet.ReadProtoMsg(body)
-	a.client.Write(protocol.NewClientMsgProtobuf(steamlang.EMsg_ClientNewLoginKeyAccepted, &protobuf.CMsgClientNewLoginKeyAccepted{
-		UniqueId: proto.Uint32(body.GetUniqueId()),
-	}))
-	a.client.Emit(&LoginKeyEvent{
-		UniqueId: body.GetUniqueId(),
-		LoginKey: body.GetLoginKey(),
-	})
-}
-
 func (a *Auth) handleLoggedOff(packet *protocol.Packet) {
 	result := steamlang.EResult_Invalid
 	if packet.IsProto {
@@ -234,12 +223,11 @@ func (a *Auth) handleUpdateMachineAuth(packet *protocol.Packet) {
 func (a *Auth) handleAccountInfo(packet *protocol.Packet) {
 	body := new(protobuf.CMsgClientAccountInfo)
 	packet.ReadProtoMsg(body)
+
 	a.client.Emit(&AccountInfoEvent{
 		PersonaName:          body.GetPersonaName(),
 		Country:              body.GetIpCountry(),
 		CountAuthedComputers: body.GetCountAuthedComputers(),
 		AccountFlags:         steamlang.EAccountFlags(body.GetAccountFlags()),
-		FacebookId:           body.GetFacebookId(),
-		FacebookName:         body.GetFacebookName(),
 	})
 }

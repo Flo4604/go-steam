@@ -1,10 +1,13 @@
 package steam
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"net"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -22,8 +25,26 @@ var steamDirectoryCache *steamDirectory = &steamDirectory{}
 
 type steamDirectory struct {
 	sync.RWMutex
-	servers       []string
+	servers       []Server
 	isInitialized bool
+}
+
+type Server struct {
+	Endpoint       string  `json:"endpoint"`
+	LegacyEndpoint string  `json:"legacy_endpoint"`
+	Type           string  `json:"type"`
+	Dc             string  `json:"dc"`
+	Realm          string  `json:"realm"`
+	Load           int     `json:"load"`
+	WtdLoad        float64 `json:"wtd_load"`
+}
+
+type ServerListResponse struct {
+	Response struct {
+		ServerList []Server `json:"serverlist"`
+		Success    bool     `json:"success"`
+		Message    string   `json:"message"`
+	} `json:"response"`
 }
 
 // Get server list from steam directory and save it for later
@@ -31,32 +52,34 @@ func (sd *steamDirectory) Initialize() error {
 	sd.Lock()
 	defer sd.Unlock()
 	client := new(http.Client)
-	resp, err := client.Get("https://api.steampowered.com/ISteamDirectory/GetCMList/v1/?cellId=0")
+	resp, err := client.Get("https://api.steampowered.com/ISteamDirectory/GetCMListForConnect/v0001/?cellid=0")
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
-	r := struct {
-		Response struct {
-			ServerList []string
-			Result     uint32
-			Message    string
-		}
-	}{}
+	r := ServerListResponse{}
 
 	if err = json.NewDecoder(resp.Body).Decode(&r); err != nil {
 		return err
 	}
 
-	if r.Response.Result != 1 {
-		return fmt.Errorf("failed to get steam directory, result: %v, message: %v\n", r.Response.Result, r.Response.Message)
+	if !r.Response.Success {
+		return fmt.Errorf("failed to get steam directory, result: %v, message: %v\n", r.Response.Success, r.Response.Message)
 	}
 
 	if len(r.Response.ServerList) == 0 {
 		return fmt.Errorf("steam returned zero servers for steam directory request\n")
 	}
 
-	sd.servers = r.Response.ServerList
+	// filter out servers that are not in realm == 'steamglobal' and not netfilter
+	var filteredServers []Server
+	for _, server := range r.Response.ServerList {
+		if server.Realm == "steamglobal" && server.Type == "netfilter" {
+			filteredServers = append(filteredServers, server)
+		}
+	}
+
+	sd.servers = filteredServers
 	sd.isInitialized = true
 	return nil
 }
@@ -68,8 +91,14 @@ func (sd *steamDirectory) GetRandomCM() *netutil.PortAddr {
 		panic("steam directory is not initialized")
 	}
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
-	addr := netutil.ParsePortAddr(sd.servers[rng.Int31n(int32(len(sd.servers)))])
-	return addr
+
+	randomServer := sd.servers[rng.Int31n(int32(len(sd.servers)))].Endpoint
+
+	split := strings.Split(randomServer, ":")
+
+	ip, _ := net.DefaultResolver.LookupIPAddr(context.Background(), split[0])
+
+	return netutil.ParsePortAddr(fmt.Sprintf("%s:%s", ip[0].String(), split[1]))
 }
 
 func (sd *steamDirectory) IsInitialized() bool {

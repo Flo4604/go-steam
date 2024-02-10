@@ -3,7 +3,7 @@ package inventory
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -62,7 +62,7 @@ func GetInventoryApps(client *http.Client, steamId steamid.SteamId) (InventoryAp
 		return nil, err
 	}
 	defer resp.Body.Close()
-	respBody, err := ioutil.ReadAll(resp.Body)
+	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}

@@ -10,8 +10,12 @@ Some of the currently implemented features:
   * Friend and group management
   * Chatting with friends
   * Persona states (online, offline, looking to trade, etc.)
-  * SteamGuard with two-factor authentication
-  * Team Fortress 2: Crafting, moving, naming and deleting items
+  * SteamGuard with two-factor authentication, and QR code
+
+
+## Disclaimer
+The QR Code login is based on the amazing work of [DoctorMcKay and his Steam Session Library](https://github.com/DoctorMcKay/node-steam-session). I just ported it to Go. All credits go to him.
+
 
 If this is useful to you, there's also the [go-steamapi](https://github.com/Flo4604/go-steam/v5/go-steamapi) package that wraps some of the official Steam Web API's types.
 

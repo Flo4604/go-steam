@@ -4,7 +4,7 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/Flo4604/go-steam/v5/protocol/steamlang"
+  "github.com/Flo4604/go-steam/v5/protocol/steamlang"
 	"github.com/Flo4604/go-steam/v5/steamid"
 )
 

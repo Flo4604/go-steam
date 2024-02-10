@@ -35,11 +35,6 @@ type SteamGuardEvent struct {
 	LastCodeWrong bool
 }
 
-type LoginKeyEvent struct {
-	UniqueId uint32
-	LoginKey string
-}
-
 type LoggedOffEvent struct {
 	Result steamlang.EResult
 }
@@ -53,6 +48,4 @@ type AccountInfoEvent struct {
 	Country              string
 	CountAuthedComputers int32
 	AccountFlags         steamlang.EAccountFlags
-	FacebookId           uint64 `json:",string"`
-	FacebookName         string
 }

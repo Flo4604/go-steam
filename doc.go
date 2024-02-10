@@ -13,7 +13,7 @@ You can also find a running example in the `gsbot` package.
 	package main
 
 	import (
-		"io/ioutil"
+		"io"
 		"log"
 
 		"github.com/Flo4604/go-steam/v5/"
@@ -32,7 +32,7 @@ You can also find a running example in the `gsbot` package.
 			case *steam.ConnectedEvent:
 				client.Auth.LogOn(myLoginInfo)
 			case *steam.MachineAuthUpdateEvent:
-				ioutil.WriteFile("sentry", e.Hash, 0666)
+				io.WriteFile("sentry", e.Hash, 0666)
 			case *steam.LoggedOnEvent:
 				client.Social.SetPersonaState(steamlang.EPersonaState_Online)
 			case steam.FatalErrorEvent:
