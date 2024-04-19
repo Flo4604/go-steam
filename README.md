@@ -26,7 +26,7 @@ If this is useful to you, there's also the [go-steamapi](https://github.com/Flo4
 ## Usage
 
 You can view the documentation with the [`godoc`](http://golang.org/cmd/godoc) tool or
-[online on godoc.org](http://godoc.org/github.com/Flo4604/go-steam/v5/go-steam).
+[online on godoc.org](https://pkg.go.dev/github.com/Flo4604/go-steam/v5).
 
 You should also take a look at the following sub-packages:
 
