@@ -1,5 +1,7 @@
 # Steam for Go
 
+NOTE: This library fork is WIP.
+
 This library implements Steam's protocol to allow automation of different actions on Steam without running an actual Steam client. It is based on [SteamKit2](https://github.com/SteamRE/SteamKit), a .NET library.
 
 In addition, it contains APIs to Steam Community features, like trade offers and inventories.
